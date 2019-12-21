@@ -1,0 +1,213 @@
+안녕하세요? 서울대학교 컴퓨터공학부의 김건희입니다.
+인공지능의 기초, 오늘은 마르코프 결정 과정과 다이내믹 프로그램을 이용해서 결정 과정을 푸는 방식에 대해 배워보도록 하겠습니다.
+지난 시간에 저희가 강화 학습의 기초를 배웠고요.
+그다음에 강화 학습을 모델링하기 위한 가장 기본적인 마르코프 결정 과정을 배우기 위해서 마르코프 과정이랑 마르코프 리워드 과정에 대해서 저희가 학습을 하였습니다.
+지난 시간에 배운 내용을 바탕으로 해서 거기에서도 한 단계 나아가서 우리가 정작 배우고자 하는 마르코프 결정 과정에 대해서 오늘 다루도록 하겠습니다.
+그리고 지난 시간에도 잠깐 말씀드렸다시피 reinforcement learning, 그러니까 강화 학습이라는 부분이 인공지능에서 좀 어려운 부분이기도 하고
+그리고 많은 경우에 대학원에서 다뤄지기 때문에 쉽지 않게 느껴질 수도 있으실 것 같습니다.
+그리고 확률통계에 대한 기본적인 지식을 필요로 하기 때문에 좀 어렵게 느껴지실 수 있는데요.
+일단 지난 시간과 이번 시간에 배운 걸 기초로 해서 좀 더 공부를 해나가시고 그리고 지난 시간에 추천해드린 강의나 책들을 함께 보신다면 더 나은 이해를 얻으실 수 있지 않을까 생각합니다.
+그러면 오늘 강의에 대해서 구체적으로 나아가 보도록 하겠습니다.
+그래서 지난 시간에는 마르코프 프로세스에 대해서 일단 배웠고요. 그다음에 마르코프 리워드 프로세스에 대해서 배웠습니다.
+그래서 그 두 개를 바탕으로 오늘은 Markov Decision Process를 소개시켜드리도록 하겠습니다.
+지난번과 마찬가지로 여기에 빨간색으로 마크 되어 있는 부분은 방금 전, 지난 시간에 배운 마르코프 리워드 프로세스에서 새롭게 추가된 컴포넌트를 보여드리고 있습니다.
+기본적으로는 다 똑같은데 action set이라고 할 수 있는 A가 상대적으로 추가됐다고 이해하시면 되겠습니다.
+A라는 건 집합이고요. 에이전트가 취할 수 있는 action들의 집합이라고 이해하시면 되겠습니다.
+그런데 action set이 새롭게 들어오면서 기존에 저희가 가지고 있던 Transition function과 Reward function도 변화를 해야 될 필요가 있습니다.
+왜냐하면, 기존에는 Transition function의 경우에 state에서 어떤 state로 가는 그런 확률분포를 표현했다고 하면, 지금은 어떤 state에서 어떤 action을 취했을 때 어떤 state로 가는.
+그게 state transition으로 정의가 되기 때문에 정의역이 조금씩 바뀌었다고 보시면 되겠죠. 정의역에 지금 action set에 대한 곱집합으로 표현이 됐다.
+그러니까 state function을 P를 예로 들면, 어떤 state에서, 그러니까 어떤 state라는 건 집합 S의 한 원소고요.
+A라는 것도 마찬가지로 집합 A의 한 원소. 그게 주어졌을 때 어떤 state로 갈지에 대한 확률분포다.
+그래서 t step의 S라는 state에 있고, 내가 그 step에서 A라는 action을 취했을 때 다음 step에 S‘으로 갈 확률을 P가 나타내게 되는 것이죠.
+Reward도 마찬가지로 A라는 term이 더 추가되는 겁니다.
+왜냐하면 어떤 state에서 어떤 Reward를 바로 받는 게 아니라, 어떤 state에서 어떤 action을 취했을 때 그다음 step에서 어떤 Reward를 받느냐. 그런 식으로 확장이 된다고 보시면 되겠습니다.
+그래서 마르코프 리워드 프로세스랑 매우 비슷한데 A가 추가됐고, A가 추가됐음으로써 P와 R이 조금씩 바뀌었다고 이해하시면 되겠습니다.
+그럼 이제 action set이라는 것을 새롭게 정의했기 때문에 이제야 policy라는 걸 좀 더 깊이 정의할 수 있게 되었습니다.
+그러니까 마르코프 리워드 프로세스에서는 action set을 아직 정의하지 않았기 때문에 policy는 정의하지 않고 value function만 정의를 했는데,
+여기서는 policy까지 정의가 가능해지게 된 것입니다.
+그래서 introduction에서 말씀드렸다시피 policy의 정의는 이와 같습니다. 그래서 어떤 state에서 어떤 action을 취할 확률분포를 policy로 정의하게 됩니다.
+그래서 이 정의에서 보시다시피 policy라는 건 history에 의존하는 게 아니라, 현재 state에만 의존합니다.
+왜냐하면, 기본적으로 이건 마르코프 프로세스의 일종이기 때문에 마르코프 assumption을 계속 사용하게 됩니다.
+그러니까 현재 state만 알면 그 history는 더 이상 알 필요가 없다. 그 바탕으로 이제 정의가 됐다고 보시면 되겠고요.
+그다음에 여기서 일단 가정하는 건 policy가 stationary, 그러니까 시간에 따라서 변화하는지 않는다고 보시면 되겠습니다.
+내가 10 step의 state에 갔을 때랑 100 step의 state에 갔을 때 만약에 걔가 똑같은 state라고 한다면, 걔에 대한 action의 확률분포는 동일하게 주어졌다고 이해하시면 되겠습니다.
+그러면 이제 policy라는 정의를 새롭게 말씀드렸고요.
+value function은 마르코프 리워드 프로세스에서 이미 얘기를 했는데, 여기에서는 value function을 좀 더 한 단계 업그레이드해야 될 필요가 있습니다.
+여기서 변화된 부분은 마찬가지로 빨간색으로 표현이 됐는데, 가장 중요한 변화는 policy가 아래첨자로 추가됐다는 것입니다.
+그러니까 제가 소개 때 말씀드렸다시피 value function이라는 건 policy가 주어졌을 때 결정이 되는 것이고요. policy가 바뀌면 value function도 바뀝니다.
+그래서 어떤 policy 하에서 value function가 정의가 됐는지 나타내기 위해서 아래첨자로 π를 썼고요.
+그러니까 마르코프 리워드 프로세스에서는 아래첨자 π가 없었는데, 그 이유는 마르코프 리워드 프로세스에서는 action set이 없었고요.
+따라서 policy에 대해서는 아직 정의를 안 했기 때문에 V를 그냥 V(s) 이런 식으로 표현을 했죠. 그러나 value function이 이런 식으로 바뀌었다는 게 하나의 중요한 변화고요.
+또 하나의 변화는 또 다른 형태의 value function이 정의가 되었습니다. 또 다른 형태의 value function은 주로 Q로 표현을 합니다.
+V는 s에 대한 함수입니다. s만 주어지면 V가 결정이 되는데, Q는 s와 A가 주어졌을 때의 value를 나타냅니다.
+그래서 이 둘의 차이를 구별하기 위해서 V는 state value function이라고 하고요. 그리고 Q는 state action value function 혹은 action value function이라고 얘기를 합니다.
+그래서 정의는 기본적으로 똑같습니다. value function도 state가 주어졌을 때 return에 대한 expectation이었는데요.
+Q에 대해서 한 가지 차이가 있다면 S가 주어졌고, 그때 어떤 action을 취했을 때 expected return이다. 그렇게 보시면 되겠습니다.
+그래서 taking action a, 이 부분이 하나 추가됐다고 이해하시면 되겠습니다.
+그래서 우리가 정작 다루는 Markov Decision Process에서는 V랑 Q라는 value function을 동시에 사용하게 된다고 이해하도록 하겠습니다.
+계속 우리가 하나의 example로부터 시작을 해서 하나하나씩 개선을 해나가면서 example을 보여드리고 있습니다.
+현재 이 example에서는 우리가 policy를 Random policy 정의를 했습니다.
+Random policy라는 건 뭐냐 하면, 어떤 state에 주어졌을 때 내가 취할 수 있는 action이 두 개라고 하면 이 두 개의 action은 0.5로 동일하다. 그렇게 보시면 되겠습니다.
+여기서 지금 나타내는 건 Vπ(s)입니다. 그러니까 만약에 Random policy를 사용할 때 value function은 지금 모형에서 빨간색으로 이렇게 표현이 되어 있고요.
+그리고 이 빨간색으로 주어진 값을 어떻게 구할지는 뒤에 다시 다루도록 하겠습니다.
+그리고 이 모델에서 한 가지 바뀐 것, 지난 example에서 바뀐 것을 보시면, Pub라는 게 그 전 example에서는 하나의 state로 정의가 됐는데, 여기는 action으로 정의가 됐습니다.
+그래서 예를 들어서 내가 만약에 이 state, 그러니까 C3라는 state에 있을 때 Pub라는 action을 취하면 1이라는 Reward를 받고 그다음에 0.4의 확률로는 C2로 가고요.
+0.2의 확률로는 C1으로 가고, 0.4의 확률로 다시 C로 돌아온다. 이걸 나타내고 있습니다.
+그래서 검은색 동그라미로 쓰여 있는 부분을 action이라고 보시면 됩니다. 어떤 action을 취했을 때, 내가 Pub라는 action을 취했을 때 3개의 state로 갈 확률이 이렇게 주어진 것이죠.
+그래서 우리가 state transition probability를, 앞에서 예를 들어서 ss’a라고 rotation을 썼는데, s라는 state에서 A라는 s‘이라는 state로 갈 확률. 그런 식으로 이해하시면 되겠습니다.
+여기서 C3에서 Pub라는 action을 취했을 때 주어진 확률로 C1, C2, C3로 옮길 수가 있다고 이해하시면 되겠습니다.
+그러면 이제 MDP에서 가장 중요한 Equation입니다. Bellman Equation에 대해서 말씀을 드리도록 하겠습니다.
+MDP에서 Bellman Equation은 크게 두 가지가 있습니다. 하나는 Bellman Expectation Equation이고, 하나는 Bellman Optimality Equation입니다.
+그래서 저희 강의에서는 Bellman Expectation Equation에 대해서만 다루고요. Bellman Optimality Equation은 제가 소개해드린 책에서는 소개가 되어 있는데요.
+그 개념은 여기서부터 상대적으로 쉽게 이해가 될 수 있기 때문에 본 강연에서는 Bellman Expectation Equation에 대해서 주로 다루도록 하겠습니다.
+기본 아이디어는 뭐냐 하면, 우리가 정의한 value function에 대해서 현재 state의 value function과 그다음 state의 value function의 상관관계를 정의한 것입니다.
+그래서 내가 어떤 state에서 Reward를 받고 다음 state로 갔을 때 현재 state에서의 value function과
+Reward를 받고 다음 state로 갔을 때 그 다음 state에서의 value function의 관계를 배운다고 보시면 되겠습니다.
+수식을 보시면 이 첫 번째 수식은 value function의 정의입니다. 이건 앞서 소개해드린 정의에서 가져온 거고요.
+그다음 수식은 Gt, 그러니까 앞서 소개해드린 return의 정의대로 표현을 한 것입니다. 그래서 첫 두 수식은 앞서 설명 드린 수식으로부터 왔다고 보시면 되겠고요.
+그다음에 이 γ가 있는 term들부터 해서 γ를 앞으로 빼고 다시 표현을 한 겁니다. 그러면 이 뒤에 건 Rt+2+γRt+3 이런 식으로 끝까지 가겠죠.
+그러면 이 안은 뭡니까? 이 안은 우리가 기존에 얘기한 return의 정의랑 동일하죠. 그런데 단지 앞에서는 Gt였는데 여기서는 Gt+1으로 바뀌어야 되겠죠. 그러니까 한 step 이후니까.
+그래서 결국에는 E에 Rt+1+γGt+1’|St=S 이런 식으로 표현이 됩니다.
+그러면 이 부분을 보시죠. 이 뒷부분을 보시면 이건 다시 value function에 대한 정의입니다. 이 부분을 value function으로 표현을 하면 결국에는 이와 같이 표현을 할 수 있습니다.
+그래서 여기서 중요한 룰을 사용한 거는 Expectation의 Expectation은 Expectation 한 번 취한 것과 같습니다.
+그래서 실제로는 여기도 한 번 Expectation 취한 거랑 똑같기 때문에 그 상황에서 이 Expectation Gt+1을 Vπ(St+1)으로 바꿨다고 이해하시면 되겠습니다.
+그래서 결과적으로 첫 번째 수식과 마지막 수식을 비교한다면, value function이라는 건 현재 step의 return의 Expected value인데,
+그건 Immediate reward에 그다음 state의 value function을 γ만큼 discount한 것과의 합으로 이렇게 표현할 수가 있다. 그래서 이 첫 번째 설명이랑 동일하게 볼 수가 있겠죠.
+value function은 두 부분으로 나눠지는데, Immediate reward, 그러니까 당장 받을 수 있는 Reward에 대한 Expectation
+그리고 다음 state로 갔을 때의 value function에 대한 Expectation. 그 두 개로 표현이 된다고 이해하시면 되겠습니다.
+그래서 앞서 말씀드린 state value function에 대한 Bellman Expectation Equation이라고 불리는 새로운 정의가 이렇게 주어졌고요.
+이거와 똑같은 방식으로 해서 Q에 대해서도 마찬가지로 이와 같이 정의를 할 수 있습니다.
+Q에 대해서 정의하는 것의 차이라고 한다면, Q는 주어지는 given part에 action이 같이 주어져야 된다는 거고요. 그 외에는 다 동일합니다.
+Immediate reward+γ 그다음에 다음 state, 다음 action에서의 Q값을 더한 것과 같다고 할 수 있겠죠.
+유도는 직접적으로 안 하지만 여러분이 똑같은 방식으로 유도를 할 수 있고요.
+결국에 V는 state에 대한 함수이고, Q는 state와 action에 대한 함수이기 때문에
+그 부분만 바꿔주시면 결국에는 state value function, action value function에 대한 Bellman Expectation Equation을 유도할 수 있다는 것입니다.
+이 두 equation이 저희 MDP 공부하는 데 있어서 가장 중요한 공식이라고 이해하고 넘어가도록 하겠습니다.
+그런데 중요한 점은 V와 Q와의 관계를 밝히고자 하는 것입니다. 일단 MDP에서는 두 가지 step으로 나뉩니다.
+두 가지 step이라는 건 뭐냐 하면, 제가 만약에 어떤 state에 있을 때 내가 어떤 action을 취하면, 그 action에 따라서, 확률분포에 따라서 state가 결정되죠.
+어떻게 보면 state에서 action으로 가는 한 가지 과정이 있고, action에서 다시 state로 가는 두 가지 과정이 있습니다.
+그래서 이 두 가지 과정을 통해서 V와 Q와의 관계도 알고, 이제 어떻게 하면 이 equation을 V로만 표현하고 Q로만 표현할 수 있는지에 대해서 말씀을 드리도록 하겠습니다.
+지금 value function에 대한 내용입니다. value function은 어떻게 정의가 될 수 있느냐? 이 policy가 주어집니다. policy는 뭐라고 말씀을 드렸죠?
+policy라는 건 내가 S라는 state에 있을 때 A라는 action을 취할 확률이죠. 그러니까 상식적으로, 수학적으로 생각해보면 내가 S라는 state에 있을 때 value라는 건 어떻게 구하느냐?
+어떻게 구하느냐 하면, 내가 S라는 state에서 취할 수 있는 action이 여러 개가 있어요.
+그런데 이 action에 대한 확률이 있을 거고 이 action에 대한 확률이 있고 여러 가지 action에 대한 확률이 있습니다.
+그러면 내가 만약에 이 확률대로 이 action을 취했을 때의 value, 이 확률대로 이 action을 취했을 때의 value.
+그러니까 확률에 대해서 weighted sum을 해줘야겠죠. 그러면 현재 state의 value를 구할 수가 있겠죠.
+그래서 이게 Expectation의 정의랑 연결이 돼 있습니다. Expectation이라는 건 뭐냐 하면, 가장 간단히 생각하면 평균이고요.
+그런데 평균이 가능한 이유는 만약에 n개의 데이터가 있는데 얘네들이 다 똑같은 weight를 가지고 있다고 하면, 여러분이 Expectation 구한다고 하면 그냥 평균을 구하면 됩니다.
+그런데 예를 들어서 내가 데이터마다 다른 확률분포를 줬다.
+그런 경우에는 이 확률에 대해서 그 값이랑 곱하고, 이 확률에 대해서 그 값이랑 곱한 다음에 다 더해야지만 Expectation을 구할 수가 있습니다.
+그럼 간단히 예제를 들어보면, 우리가 어떤 한 학급에서 시험을 봤다고 가정해보죠. 시험을 보면 만약에 한 강의실에 50명의 학생이 있다고 하면, 50명에 대한 성적 분포가 나올 것입니다.
+distribution이 나올 텐데, 여러분이 그 학급이 얼마나 잘하는지 못하는지를 하나의 숫자로 표현해본다고 해보세요.
+하나의 숫자로 표현하는 가장 좋은 방법이 뭘까요? 그건 50명 학생의 성적을 평균 내는 것이죠. 그래서 50명에 대한 성적 분포가 있는데, 그걸 하나의 숫자로 요약한 거고요.
+그렇게 하나의 숫자로 요약을 하면 이 반과 저 반과 또 다른 반 사이에서 누가 더 잘했는지 하나의 숫자로 이제 비교가 되는 것이죠.
+그런데 저희가 평균을 구한다는 건 똑같은 weight로 값을 구했다는 겁니다.
+그런데 제가 만약에 너는 0.2의 weight를 주고 너는 0.1의 weight를 줬다고 하면,
+그 weight값이랑 그 학생의 성적이랑 곱하고 또 이 weight랑 그 학생의 성적을 곱하는 식으로 다 더해야지만 Expectation을 구할 수가 있다는 거죠.
+그러니까 우리가 일반적으로 평균이라고 하면 weight라는 걸 그냥 1/50으로 다 똑같이 줬다고 보시면 되고요.
+만약에 학생들마다 서로 다른 weight를 주게 되면 이런 식으로 표현을 하게 됩니다.
+V라는 state S에 대한 value function은 내가 그 state에서 취하게 될 모든 action에 대해서 확률분포를 다 구한 다음에 그 확률분포대로 Q값을 곱했다고 보면 됩니다.
+그래서 이건 Expectation을 구했다고 보시면 되겠고요. 그래서 결국에는 state value function을 구하고자 하려면 Q값을 알아야 되는 것입니다.
+만약에 우리가 각 state와 action 사이의 Q값을 알면, V값을 자동적으로 구할 수 있고요. 그럼 이제 Q값을 한번 어떻게 구할지 보죠.
+현재 내가 어떤 state에서 어떤 action을 취했을 때 Q값이라는 건 어떻게 정의가 되느냐 하면, 이 그림을 자세히 이해해보면 검은색 동그라미로 표현된 부분이 action입니다.
+그래서 실제로는 이 그림이 여기 이렇게 붙어 있는 거라고 보시면 되겠고요. 여기는 또 다른 게 붙어 있다고 보시면 되겠습니다.
+그래서 현재 S와 A가 주어졌을 때의 value function을 어떻게 구하느냐 하면, 내가 state S에서 A를 취했을 때의 Reward 더하기, 그다음에 이건 무엇이죠?
+이건 state transition probability죠? 그러니까 S라는 state에서 내가 A라는 action을 취했을 때 S‘으로 갈 확률입니다.
+그래서 결국에 이 부분도 마찬가지입니다. 이 부분도 결국에는 Expectation 값을 구한 거예요.
+그러니까 내가 S라는 state에서 A라는 action을 취했을 때 이 state로 갈 수도 있고, 이 state로 갈 수도 있고, 이 state로 갈 수도 있습니다.
+그 state 각각은 Pss’이라는 값으로 확률분포가 주어졌고요. 여기로 갔을 때 이 state의 value값, 이 state의 value값, 이 state의 value의 확률대로 weighted sum을 한 Expectation이 된다.
+그런데 이건 다음 step이기 때문에 γ만큼 discount를 해야 되고요.
+이 Reward는 우리가 어떤 state에서 어떤 action을 취하고, 그 결과로 state를 transition하면서 R을 받기 때문에 이런 식으로 표현이 됩니다.
+그러니까 어떻게 보면 우리가 state에서 action을 취해서 다른 state로 가는 과정을 두 step으로 나눈 것이고요.
+그래서 V는 Q로 정의가 되고, Q는 다시 그 다음 step의 state의 V값으로 정의가 됩니다. 그래서 결국에는 이 두 가지 equation이 가장 핵심이 되는 equation이라고 보시면 되겠습니다.
+그러면 여기서 한 가지 ‘마음에 안 든다.’ 이렇게 생각할 수 있는 게 뭐냐 하면, V를 구하려면 Q를 구해야 되잖아요. 그리고 Q를 구하려면 V를 구해야 된다.
+그런데 많은 경우에 둘 다 계속 구하고 싶지 않은 경우도 많습니다. V만 가지고 있거나 혹은 Q만 가지고 싶은 경우가 있습니다.
+그래서 결국에 이 두 equation을 합쳐서 V는 V에 대한 equation으로만 표현하고, Q는 Q에 대한 equation으로만 표현을 해보자. 그게 다음 슬라이드에 나온 내용입니다.
+그래서 첫 번째 equation은 뭐냐 하면, 앞에 equation에서 원래 여기가 Q값이었죠? 그런데 그 Q값 대신에 그 앞에 equation에 Q에 대한 equation을 그냥 넣은 것입니다.
+이것도 마찬가지로 여기가 실제로는 다음 state에 대한 value였는데, 그걸 이 equation대로 적용한 것이죠.
+그런데 여기서 주의해야 될 점은 여기 현재 state s에 대한 게 아니라 다음 state s에 대한 equation으로 써야 된다.
+지금 말씀드린 두 equation을 V를 기준으로 정리를 한 번 것, Q를 기준으로 정리를 한 번 한 것, 이렇게 두 개로 나눠져 있다고 보시면 되겠습니다.
+이렇게 하나의 equation으로 보면 되게 길고 복잡해 보이실 수 있는데, 앞 슬라이드에서 말씀드린 대로 두 가지 step으로 나누면 상대적으로 쉽게 이해할 수 있습니다.
+그러니까 처음에 V라는 현재 state의 value function 값은 검은색 동그라미에 붙어 있는 Q(s, a) 값으로 표현이 되고요.
+그러니까 내가 현재 state에서 취할 수 있는 action이 여러 개가 있고, 각각에 대해서 Q값이 존재하고, 그 Q값에 대한 확률분포도 존재하죠. 그렇게 일단 표현을 할 수 있고요.
+또 Q는 내가 어떤 state에서 어떤 action을 취하면 Reward를 받고 그다음에 P라는 state transition matrix에 의해서 다음 state로 갈 텐데, 그 과정을 앞 슬라이드에서 설명을 드린 거죠.
+그래서 이 둘을 합치면 V에 대해서 정리한 것, Q에 대해서 정리한 것. 이 두 가지로 이해하실 수 있겠습니다.
+그래서 결국에 저희가 실제로 쓰게 될 equation은 여러분이 만약 V를 쓰게 된다면 첫 번째 equation을 주로 쓰고, Q를 쓴다고 하면 두 번째 equation을 주로 쓴다고 이해하시면 되겠습니다.
+그래서 이건 Bellman Equation의 예제를 한번 보여드리는 것입니다. 어떻게 구할 수 있는지를 예제로 보여드리는 거고요.
+앞서 말씀드렸다시피 현재 우리가 관심 있는 state는 이겁니다. 그러니까 이게 C3라는 state인데, 이 C3라는 state에서의 value function을 한번 구해보자.
+그래서 equation은 Bellman Equation에 따라서 이와 같이 주어졌죠. 그다음에 중요한 것은 이 policy죠.
+그런데 우리가 그 전 example에서 Random policy를 정의했습니다. Random policy라는 건 뭡니까?
+내가 이 state에서 Study라는 action을 취할 확률이랑 Pub를 취할 확률이랑 똑같다는 것입니다.
+그래서 얘는 0.5로 고정이 됩니다. 그러면 여기 보시다시피 내가 모든 가능한 A에 대해서 다 summation을 해야 됩니다.
+그래서 먼저 Study라는 action을 취했을 때 한번 보죠. 그러면 내가 만약에 Study라는 action을 취했으면, 이 π값이 얼마가 되죠? 말씀드린 대로 0.5가 되고요. 뒤에 있습니다. 0.5가 되고요.
+그다음에 Reward가 어떻게 되죠? Reward가 10입니다. 그래서 이 부분이 10이 되고요.
+그다음에 내가 C3라는 state에서 Study라는 action을 취할 때 갈 수 있는 state라는 건 하나밖에 존재하지 않습니다. 이 Sleep이라는 state 하나밖에 존재하지 않죠.
+그래서 하나에 대해서만 고르라고 하면 되는데, 그런데 Sleep이라는 state의 value값이 뭐가 됩니까? 0이 됩니다.
+그래서 여러분이 Study를 처음 고려했을 때 이 equation을 따라가면 이게 0.5가 되고, 이게 10이 되고요. 그다음에 이 V가 0이 되기 때문에 결국에는 0.5×10이 된다고 이해하시면 되겠고요.
+제가 이 Study부터 한 이유는 이 앞에 게 좀 복잡하기 때문에 간단한 것부터 말씀드린 것입니다.
+그러면 또 다른 action인 Pub에 대해서 보도록 하죠. 여러분이 Pub라는 action을 취할 확률은 몇이죠? 0.5로 동일합니다. 그래서 이건 0.5가 되겠고요.
+그다음에 내가 C3에서 Pub라는 action을 취했을 때 Immediate reward는 1입니다.
+그다음에 이 부분을 구해야 되는데, 저희가 γ, discount factor을 계산을 쉽게 하기 위해서 일단 1이라고 가정을 했습니다. 그러면 얘는 1이니까 일단 고려를 안 해도 되겠고요.
+그리고 이 상황에서 제가 C3에서 Pub를 한 다음에 갈 수 있는 state가 몇 개 있습니까? 지금 3개 있죠. 그래서 이 S라는 게 C1, C2, C3입니다. 그래서 C1, C2, C3에 대해서 다 계산을 해야 돼요.
+그래서 C1일 확률이 뭡니까? C1일 확률은 얘가 0.2죠. 그때 0.2라는 확률로 갔을 때의 value function은 뭡니까? -1.4입니다. 그래서 0.2×(-1.3)이 있고요.
+그다음에 C2. C2의 확률은 0.4입니다. 그걸 따라갔을 때 value는 2.7이었죠. 그래서 0.4×2.7.
+그다음에 마지막으로 C3죠. C3일 때는 0.4의 확률이었고, C3의 value값은 7.4였습니다.
+그래서 총 현재 C3라는 state에서의 value값은 이제 주어진 equation에 따라서 이와 같이 주어집니다. 그래서 이걸 여러분이 계산해보면 7.4라는 값이 나오게 됩니다.
+그래서 지금까지 말씀드린 내용은 저희가 마르코프 프로세스부터 시작해서 정작 알아야 될 Markov Decision Process까지 정의를 다 말씀드렸고요.
+그때의 value function 정의, V랑 Q가 있고 그다음에 policy에 의한 정의를 말씀드렸고요.
+그리고 그게 주어진 상태에서 MDP에서 가장 중요한 equation이라고 말씀을 드린 Bellman Expectation Equation을 소개시켜드렸고요.
+Bellman Expectation Equation을 정의하려면, V를 정의하려면 Q가 필요하고요. Q를 정의하려면 V가 필요했고요.
+그래서 여러분이 이 두 수식을 이용해서 V로만 표현하고 싶다, Q로만 표현하고 싶다. 이렇게 양방향으로 할 수가 있고요.
+그다음에 지금 방금 value function을 어떻게 구할지에 대한 예제를 소개시켜드렸습니다.
+지금까지는 어떻게 보면 여러분이 이 예제에서는 value값이 이렇게 주어져 있기 때문에 한 가지 step에 대해서 example로 계산을 해볼 수가 있는데,
+이런 게 전혀 주어지지 않은 상태에서 처음부터 어떻게 계산하는지 그 과정은 다음 시간에 다뤄보도록 하겠습니다.
+그래서 현재 예제 같은 경우에는 V가 이렇게 주어진 상태에서 한 step에 대한 value function 값을 구하는 걸 예제로 보여드렸고요.
+처음부터 value값이 state마다 주어지지 않았을 때 어떻게 구할 수 있는지를 전체 equation를 통해서 표현해볼 수 있습니다.
+우리가 Bellman Equation을 좀 전 예제에서는 하나의 state에 대해서 따로 따로 표현했다고 하면, 만약 n개의 state가 있다고 하면 V를 n×1 벡터로 표현할 수 있고요.
+Reward도 마찬가지로 n×1 벡터로 표현할 수 있고, P도 policy가 정해진 상태에서는 n×n matrix로 표현할 수 있고요.
+이와 같은 식으로 지금 앞서 말씀드린 수식을 행렬 형태로 표현한다면 이와 같이 표현할 수 있습니다.
+그래서 보시다시피 V라는, value function이라는 게 왼쪽에도 존재하고 오른쪽에도 존재합니다.
+그래서 구하는 방식은 두 가지 방식이 있는데, 여러분이 value function을 하나 initialization을 한 다음에, R이라는 건 주어진 거고요. P라는 것도 주어진 겁니다.
+그래서 MDP 정의를 보시면 R과 P가 주어져야 되는 값입니다. 그래서 P와 R이 주어졌다고 하면 Random initialization한 V로부터 새로운 V를 구할 수 있고요.
+그 V를 다시 우항에 넣어서 γP를 곱하고 다시 R을 더해서 또 다른 V를 곱하고. 이 과정을 반복을 하면 여러분이 수렴된 V를 구할 수 있습니다. 그게 한 가지 방법이고요.
+또 하나의 방법이라고 한다면 이와 같이 수식 형태로 표현이 됐기 때문에 여기서 이 부분을 좌항으로 넘깁니다.
+그러면 실제로는 이게 matrix multiplication이기 때문에 이건 identity matrix, 그러니까 n×n에 identity matrix를 곱한 거로 표현할 수 있고요.
+이걸 좌항으로 넘겼다고 하면 V에 대해서 이렇게 표현을 할 수 있고요. 그다음에 나누기. matrix에서 나누기 개념을 하는 게 역행렬이잖아요.
+그래서 그 부분에 대해서 역행렬을 양쪽에 곱해주면 왼쪽에 있는 애는 사라지고 이제 오른쪽에 역행렬이 들어가게 됩니다.
+그런데 이 방법은 추천해줄 수는 없는 방법입니다. 왜냐하면 matrix, 행렬이 n×n 행렬이라고 하면, 이 n×n 행렬의 역행렬을 구하는 복잡도가 n의 3승입니다.
+그러니까 만약에 state가 10개 정도 있다고 하면 상관이 없는데, state가 100개, 1,000개 이런 식으로 급격히 많아진다고 했을 때 n의 3승의 복잡도라는 건 매우 오랜 시간이 필요한 복잡도입니다.
+그래서 이렇게 역행렬을 구해서 풀지 말고 좀 더 효율적으로 풀 수 있는 방법이 여러 가지가 있는데, 하나는 Dynamic programming이고요. 이건 다음 시간을 통해서 저희가 배울 예정이고요.
+그다음에 Monte-Carlo evaluation, Temporal-Difference learning라는 건 좀 더 advanced, 고급 테크닉인데요.
+아쉽게도 본 강의에서는 다루지 않고요. 여러분이 관심 있다면 책이나 강화학습에 초점을 맞춘 강연을 통해서 확인해보실 수가 있겠습니다.
+아주 중요한 개념으로서 Optimal Value Function에 대해서 소개시켜 드리고자 합니다.
+좀 전에 말씀드렸다시피 value function을 구하기 위해서는 policy가 주어져 있어야 합니다. 그래서 저희가 value function 아래첨자로 π를 추가했었는데요.
+그래서 Optimal Value Function이라는 건 뭐냐 하면, 주어진 문제에서 모든 가능한 policy를 다 고려했을 때 가장 최대가 되는 value function이 Optimal Value Function입니다.
+그래서 Optimal이라는 뜻으로 별표를 아래첨자로 씁니다. 이건 policy마다 다른 value function이 존재하는데, policy들 중에서 최적의 policy가 되는 것이죠.
+그러니까 value function을 최대화하는 policy가 주어졌을 때의 value function이 V*(s)라고 주어지고요.
+Q도 마찬가지로 똑같이 정의를 할 수 있습니다.
+수많은 policy에 대해서 Q value function의 값이 다 달라질 텐데, 그 중에서 최적의 policy를 취했을 때 Q가 maximize되는 때의 Optimal action value function을 이와 같이 정의합니다.
+한 가지 MDP에서 중요한 이론 중에 하나는 어떤 MDP라도 여러분의 MDP를 정의하면 항상 optimal policy라는 건 존재한다는 것이고요. 그래서 optimal policy는 항상 존재한다.
+그리고 optimal policy를 따랐을 때의 value function이랑 value function의 최대, 그러니까 최적의 value function은 같다는 거고요.
+그리고 Q에 대해서도 마찬가지입니다. 여러분이 optimal policy를 찾은 다음에 그때 Q를 구해도 되고요.
+아니면 Q값들 중에 최대가 되는 최적의 Q를 구해도 됩니다. 그렇게 구한 다음에 optimal policy를 찾을 수도 있습니다.
+그래서 이 수식의 의미는 지금 말씀드린 대로 optimal value function을 찾은 다음에 거기서부터 best policy, 최적의 policy를 찾아도 되고요.
+혹은 최적의 policy를 찾아서 그거에 대한 value function을 구하면 역시 마찬가지로 V*(s)를 구할 수 있고 얘네들은 항상 같다는 것이죠.
+그래서 optimal policy를 찾는 과정은 실제로는 간단합니다. 간단한 이유가 optimal value function을 찾으면 optimal policy는 쉽게 찾을 수 있다는 것입니다.
+그래서 많은 경우에 policy를 다루지 않고 그냥 value function만 다루는 경우가 있습니다.
+value function만 다뤄서 최적의 value function을 찾으면 거기서부터 최적의 policy를 찾는 건 너무 쉬운 일이기 때문에.
+만약에 최적의 value function이 주어졌을 때 어떻게 최적의 policy를 찾느냐? 그건 너무나도 간단한데, Q를 한번 예로 들어보죠.
+최적의 Q라는 건 뭐냐 하면, state가 주어지고 action이 주어졌을 때의 value를 정의한 함수입니다.
+그러니까 어떤 state가 있었을 때 그 state에서 취할 수 있는 action이 이렇게 여러 개 있다고 했을 때 그냥 Q*(s, a).
+첫 번째 action에 대한 Q값, 두 번째 action에 대한 Q값, 세 번째 action에 대한 Q값을 다 따져봐서 그 중에 최대가 되는 action을 취하면 최적의 policy가 되는 거죠.
+그러니까 Q값을 구해놓으면 그 state에서 수많은 action에 대한 Q값들을 다 비교해서 그 Q값들 중에 가장 큰 Q값을 가지는 action을 항상 취하도록 하는 게 optimal policy이 된다는 겁니다.
+그래서 많은 경우에 value function부터 구하고 그다음에 policy를 구하는 식으로 진행이 됩니다.
+이건 optimal policy에 대한 예제입니다. 여기 보시면 빨간색으로 되어 있는 화살표가 optimal policy라는 얘기입니다.
+예를 들면 제가 만약에 C3라는 state에 있어요. 그럴 경우에 제가 취할 수 있는 action은 Pub가 있고요. 제가 취할 수 있는 action은 Study가 있습니다.
+그런데 제가 만약에 C3에 있을 때 Study를 취하면 이게 값이 주어진 대로 10이라고 한번 가정을 해보고요.
+그리고 예를 들어서 C3에 있을 때 Pub라는 action을 취하면 여기 주어진 대로 8.4라는 값을 가지게 되죠.
+그래서 이 C3라는 state에 있어서 optimal policy라는 건 C에 오면 Study를 취해라. Study라는 action을 해라. 그게 optimal policy입니다.
+그래서 결국에는 각 state마다 여러 개의 화살표가 있지만, 빨간색으로 된 화살표는 그 state에 있으면 그 action을 취하는 게 optimal이다. 그런 의미로 이해하실 수 있겠습니다.
+오늘은 MDP의 완벽한 정의에 대해서 말씀을 드렸고요. 그 MDP로 오면서 value function이 V랑 Q라는 애가 존재한다. 그리고 policy라는 걸 정의할 수도 있다. 그거에 대해서 말씀을 드렸고요.
+그다음에 Bellman Expectation Equation이 MDP에서 제일 중요한 equation이고요. 그거에 대해서 소개시켜드렸고요.
+그다음에는 optimal policy는 어떻게 구하느냐. optimal value function을 구하면 된다. optimal value function을 구하면 쉽게 optimal policy를 구할 수 있다.
+그리고 예제는 이와 같다고 말씀을 드리면서 오늘 강의는 여기서 마치도록 하겠습니다. 그럼 다음 시간에 다시 뵙도록 하겠습니다.
